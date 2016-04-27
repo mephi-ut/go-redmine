@@ -3,6 +3,7 @@ package redmine
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"net/http"
 	"strconv"
 	"strings"
@@ -149,16 +150,17 @@ func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
 	ir.Issue = issue
 	s, err := json.Marshal(ir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Got error from json.Marshal(ir): %v", err.Error())
 	}
-	req, err := http.NewRequest("POST", c.endpoint+"/issues.json?key="+c.apikey, strings.NewReader(string(s)))
+	uri      := c.endpoint+"/issues.json?";
+	req, err := http.NewRequest("POST", uri+"key="+c.apikey, strings.NewReader(string(s)))
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Got error from http.NewRequest(\"POST\", \"%v&key=********\", \"%v\")", uri, s, err.Error())
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Got error from c.Do(req): %v", err.Error())
 	}
 	defer res.Body.Close()
 
@@ -174,7 +176,7 @@ func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
 		err = decoder.Decode(&r)
 	}
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Got error from decoder.Decode() [res.StatusCode == %v]: %v", res.StatusCode, err.Error())
 	}
 	return &r.Issue, nil
 }

@@ -32,12 +32,13 @@ type User struct {
 func (c *Client) UsersByFilter(filter url.Values) ([]User, error) {
 	var filterStr string;
 	if (len(filter) > 0) {
-		filterStr = "&"+filter.Encode()
+		filterStr = filter.Encode()
 	}
 
-	res, err := c.Get(c.endpoint + "/users.json?key=" + c.apikey+filterStr)
+	url      := c.endpoint + "/users.json?" +filterStr
+	res, err := c.Get(url+"&key="+c.apikey)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Got error from c.Get(\"%v&key=********\"): %v", url, err.Error())
 	}
 	defer res.Body.Close()
 
@@ -65,7 +66,7 @@ func (c *Client) Users() ([]User, error) {	// For backward compatibility
 func (c *Client) UserByLogin(login string) (*User, error) {
 	users,err := c.UsersByFilter( url.Values { "name": []string{login} } )
 	if (err != nil) {
-		return nil, err
+		return nil, fmt.Errorf("Got error from UsersByFilter(): %v", err.Error())
 	}
 
 	if (len(users) == 0) {
