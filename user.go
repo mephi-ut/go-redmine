@@ -24,6 +24,7 @@ type User struct {
 	CreatedOn   string       `json:"created_on"`
 	LatLoginOn  string       `json:"last_login_on"`
 	Memberships []Membership `json:"memberships"`
+	ApiKey      string       `json:"api_key"`
 }
 
 func (c *Client) Users() ([]User, error) {
