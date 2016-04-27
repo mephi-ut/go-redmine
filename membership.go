@@ -6,6 +6,7 @@ import (
 	"net/http"
 	"strconv"
 	"strings"
+	"fmt"
 )
 
 type membershipsResult struct {
@@ -21,11 +22,13 @@ type membershipRequest struct {
 }
 
 type Membership struct {
-	Id      int      `json:"id"`
-	Project IdName   `json:"project"`
-	User    IdName   `json:"user"`
-	Roles   []IdName `json:"roles"`
-	Groups  []IdName `json:"groups"`
+	Id      int      `json:"id,omitempty"`
+	Project IdName   `json:"project,omitempty"`
+	User    IdName   `json:"user,omitempty"`
+	UserId  int      `json:"user_id,omitempty"`
+	Roles   []IdName `json:"roles,omitempty"`
+	RoleIds []int    `json:"role_ids,omitempty"`
+	Groups  []IdName `json:"groups,omitempty"`
 }
 
 func (c *Client) Memberships(projectId int) ([]Membership, error) {
@@ -87,16 +90,23 @@ func (c *Client) CreateMembership(membership Membership) (*Membership, error) {
 	ir.Membership = membership
 	s, err := json.Marshal(ir)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Got error from json.Marshal(ir): %v", err.Error())
 	}
-	req, err := http.NewRequest("POST", c.endpoint+"/memberships.json?key="+c.apikey, strings.NewReader(string(s)))
+
+	project,err := c.Project(membership.Project.Id);
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Got error from c.Project(%v): %v", membership.Project.Id, err.Error())
+	}
+
+	url      := c.endpoint+"/projects/"+project.Identifier+"/memberships.json?"
+	req, err := http.NewRequest("POST", url+"key="+c.apikey, strings.NewReader(string(s)))
+	if err != nil {
+		return nil, fmt.Errorf("Got error from http.NewRequest(\"POST\", \"%vkey=********\", \"%v\"): %v", url, s, err.Error())
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.Do(req)
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Got error from c.Do(req): %v", err.Error())
 	}
 	defer res.Body.Close()
 
@@ -112,7 +122,7 @@ func (c *Client) CreateMembership(membership Membership) (*Membership, error) {
 		err = decoder.Decode(&r)
 	}
 	if err != nil {
-		return nil, err
+		return nil, fmt.Errorf("Got error from decoder.Decode() [res.StatusCode == %v]: %v", res.StatusCode, err.Error())
 	}
 	return &r.Membership, nil
 }

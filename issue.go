@@ -155,7 +155,7 @@ func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
 	uri      := c.endpoint+"/issues.json?";
 	req, err := http.NewRequest("POST", uri+"key="+c.apikey, strings.NewReader(string(s)))
 	if err != nil {
-		return nil, fmt.Errorf("Got error from http.NewRequest(\"POST\", \"%v&key=********\", \"%v\")", uri, s, err.Error())
+		return nil, fmt.Errorf("Got error from http.NewRequest(\"POST\", \"%vkey=********\", \"%v\")", uri, s, err.Error())
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.Do(req)
