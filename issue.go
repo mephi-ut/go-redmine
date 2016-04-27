@@ -45,7 +45,7 @@ type CustomField struct {
 	Value	string  `json:"value"`
 }
 
-func (c *client) IssuesOf(projectId int) ([]Issue, error) {
+func (c *Client) IssuesOf(projectId int) ([]Issue, error) {
 	res, err := c.Get(c.endpoint + "/issues.json?project_id=" + strconv.Itoa(projectId) + "&key=" + c.apikey)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (c *client) IssuesOf(projectId int) ([]Issue, error) {
 	return r.Issues, nil
 }
 
-func (c *client) Issue(id int) (*Issue, error) {
+func (c *Client) Issue(id int) (*Issue, error) {
 	res, err := c.Get(c.endpoint + "/issues/" + strconv.Itoa(id) + ".json?key=" + c.apikey)
 	if res.StatusCode == 404 {
 		return nil, errors.New("Not Found")
@@ -96,7 +96,7 @@ func (c *client) Issue(id int) (*Issue, error) {
 	return &r.Issue, nil
 }
 
-func (c *client) IssuesByQuery(query_id int) ([]Issue, error) {
+func (c *Client) IssuesByQuery(query_id int) ([]Issue, error) {
 	res, err := http.Get(c.endpoint + "/issues.json?query_id=" + strconv.Itoa(query_id) + "&key=" + c.apikey)
 	if err != nil {
 		return nil, err
@@ -120,7 +120,7 @@ func (c *client) IssuesByQuery(query_id int) ([]Issue, error) {
 	return r.Issues, nil
 }
 
-func (c *client) Issues() ([]Issue, error) {
+func (c *Client) Issues() ([]Issue, error) {
 	res, err := c.Get(c.endpoint + "/issues.json?key=" + c.apikey)
 	if err != nil {
 		return nil, err
@@ -144,7 +144,7 @@ func (c *client) Issues() ([]Issue, error) {
 	return r.Issues, nil
 }
 
-func (c *client) CreateIssue(issue Issue) (*Issue, error) {
+func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
 	var ir issueRequest
 	ir.Issue = issue
 	s, err := json.Marshal(ir)
@@ -179,7 +179,7 @@ func (c *client) CreateIssue(issue Issue) (*Issue, error) {
 	return &r.Issue, nil
 }
 
-func (c *client) UpdateIssue(issue Issue) error {
+func (c *Client) UpdateIssue(issue Issue) error {
 	var ir issueRequest
 	ir.Issue = issue
 	s, err := json.Marshal(ir)
@@ -214,7 +214,7 @@ func (c *client) UpdateIssue(issue Issue) error {
 	return err
 }
 
-func (c *client) DeleteIssue(id int) error {
+func (c *Client) DeleteIssue(id int) error {
 	req, err := http.NewRequest("DELETE", c.endpoint+"/issues/"+strconv.Itoa(id)+".json?key="+c.apikey, strings.NewReader(""))
 	if err != nil {
 		return err
