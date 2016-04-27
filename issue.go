@@ -22,27 +22,27 @@ type issuesResult struct {
 }
 
 type Issue struct {
-	Id          int     `json:"id"`
-	Subject     string  `json:"subject"`
-	Description string  `json:"description"`
-	ProjectId   int     `json:"project_id"`
-	Project     *IdName `json:"project"`
-	Tracker     *IdName `json:"tracker"`
-	StatusId    int     `json:"status_id"`
-	Status      *IdName `json:"status"`
-	Priority    *IdName `json:"priority"`
-	Author      *IdName `json:"author"`
-	AssignedTo  *IdName `json:"assigned_to"`
-	Notes       string  `json:"notes"`
-	StatusDate  string  `json:"status_date"`
-	CreatedOn   string  `json:"created_on"`
-	UpdatedOn   string  `json:"updated_on"`
-	CustomFields []*CustomField `json:"custom_fields"`
+	Id          int     `json:"id,omitempty"`
+	Subject     string  `json:"subject,omitempty"`
+	Description string  `json:"description,omitempty"`
+	ProjectId   int     `json:"project_id,omitempty"`
+	Project     *IdName `json:"project,omitempty"`
+	Tracker     *IdName `json:"tracker,omitempty"`
+	StatusId    int     `json:"status_id,omitempty"`
+	Status      *IdName `json:"status,omitempty"`
+	Priority    *IdName `json:"priority,omitempty"`
+	Author      *IdName `json:"author,omitempty"`
+	AssignedTo  *IdName `json:"assigned_to,omitempty"`
+	Notes       string  `json:"notes,omitempty"`
+	StatusDate  string  `json:"status_date,omitempty"`
+	CreatedOn   string  `json:"created_on,omitempty"`
+	UpdatedOn   string  `json:"updated_on,omitempty"`
+	CustomFields []*CustomField `json:"custom_fields,omitempty"`
 }
 
 type CustomField struct {
-	Id      int     `json:"id"`
-	Name	string  `json:"name"`
+	Id      int     `json:"id,omitempty"`
+	Name	string  `json:"name,omitempty"`
 	Value	string  `json:"value"`
 }
 
