@@ -85,28 +85,28 @@ func (c *Client) Membership(id int) (*Membership, error) {
 	return &r.Membership, nil
 }
 
-func (c *Client) CreateMembership(membership Membership) (*Membership, error) {
+func (c *Client) CreateMembership(membership Membership) (*Membership, error, int) {
 	var ir membershipRequest
 	ir.Membership = membership
 	s, err := json.Marshal(ir)
 	if err != nil {
-		return nil, fmt.Errorf("Got error from json.Marshal(ir): %v", err.Error())
+		return nil, fmt.Errorf("Got error from json.Marshal(ir): %v", err.Error()), 0
 	}
 
 	project,err := c.Project(membership.Project.Id);
 	if err != nil {
-		return nil, fmt.Errorf("Got error from c.Project(%v): %v", membership.Project.Id, err.Error())
+		return nil, fmt.Errorf("Got error from c.Project(%v): %v", membership.Project.Id, err.Error()), 0
 	}
 
 	url      := c.endpoint+"/projects/"+project.Identifier+"/memberships.json?"
 	req, err := http.NewRequest("POST", url+"key="+c.apikey, strings.NewReader(string(s)))
 	if err != nil {
-		return nil, fmt.Errorf("Got error from http.NewRequest(\"POST\", \"%vkey=********\", \"%v\"): %v", url, s, err.Error())
+		return nil, fmt.Errorf("Got error from http.NewRequest(\"POST\", \"%vkey=********\", \"%v\"): %v", url, s, err.Error()), 0
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Got error from c.Do(req): %v", err.Error())
+		return nil, fmt.Errorf("Got error from c.Do(req): %v", err.Error()), 0
 	}
 	defer res.Body.Close()
 
@@ -122,9 +122,9 @@ func (c *Client) CreateMembership(membership Membership) (*Membership, error) {
 		err = decoder.Decode(&r)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("Got error from decoder.Decode() [res.StatusCode == %v]: %v", res.StatusCode, err.Error())
+		return nil, fmt.Errorf("Got error from decoder.Decode() [res.StatusCode == %v]: %v", res.StatusCode, err.Error()), res.StatusCode
 	}
-	return &r.Membership, nil
+	return &r.Membership, nil, res.StatusCode
 }
 
 func (c *Client) UpdateMembership(membership Membership) error {

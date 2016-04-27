@@ -41,9 +41,9 @@ type Issue struct {
 }
 
 type CustomField struct {
-	Id      int     `json:"id,omitempty"`
-	Name	string  `json:"name,omitempty"`
-	Value	string  `json:"value"`
+	Id      int          `json:"id,omitempty"`
+	Name	string       `json:"name,omitempty"`
+	Value	interface{}  `json:"value"`
 }
 
 func (c *Client) IssuesOf(projectId int) ([]Issue, error) {
@@ -145,22 +145,22 @@ func (c *Client) Issues() ([]Issue, error) {
 	return r.Issues, nil
 }
 
-func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
+func (c *Client) CreateIssue(issue Issue) (*Issue, error, int) {
 	var ir issueRequest
 	ir.Issue = issue
 	s, err := json.Marshal(ir)
 	if err != nil {
-		return nil, fmt.Errorf("Got error from json.Marshal(ir): %v", err.Error())
+		return nil, fmt.Errorf("Got error from json.Marshal(ir): %v", err.Error()), 0
 	}
 	uri      := c.endpoint+"/issues.json?";
 	req, err := http.NewRequest("POST", uri+"key="+c.apikey, strings.NewReader(string(s)))
 	if err != nil {
-		return nil, fmt.Errorf("Got error from http.NewRequest(\"POST\", \"%vkey=********\", \"%v\")", uri, s, err.Error())
+		return nil, fmt.Errorf("Got error from http.NewRequest(\"POST\", \"%vkey=********\", \"%v\")", uri, s, err.Error()), 0
 	}
 	req.Header.Set("Content-Type", "application/json")
 	res, err := c.Do(req)
 	if err != nil {
-		return nil, fmt.Errorf("Got error from c.Do(req): %v", err.Error())
+		return nil, fmt.Errorf("Got error from c.Do(req): %v", err.Error()), 0
 	}
 	defer res.Body.Close()
 
@@ -176,9 +176,9 @@ func (c *Client) CreateIssue(issue Issue) (*Issue, error) {
 		err = decoder.Decode(&r)
 	}
 	if err != nil {
-		return nil, fmt.Errorf("Got error from decoder.Decode() [res.StatusCode == %v]: %v", res.StatusCode, err.Error())
+		return nil, fmt.Errorf("Got error from decoder.Decode() [res.StatusCode == %v]: %v", res.StatusCode, err.Error()), res.StatusCode
 	}
-	return &r.Issue, nil
+	return &r.Issue, nil, res.StatusCode
 }
 
 func (c *Client) UpdateIssue(issue Issue) error {
