@@ -6,7 +6,7 @@ import (
 	"errors"
 	"flag"
 	"fmt"
-	"github.com/mattn/go-redmine"
+	"github.com/mephi-ut/go-redmine"
 	"io/ioutil"
 	"math/rand"
 	"net/http"
@@ -497,13 +497,7 @@ func listMemberships(projectId int) {
 	}
 }
 
-func showUser(id int) {
-	c := redmine.NewClient(conf.Endpoint, conf.Apikey)
-	user, err := c.User(id)
-	if err != nil {
-		fatal("Failed to show user: %s\n", err)
-	}
-
+func printUser(user *redmine.User) {
 	fmt.Printf(`
 Id: %d
 Login: %s
@@ -518,6 +512,26 @@ CreatedOn: %s
 		user.Lastname,
 		user.Mail,
 		user.CreatedOn)
+}
+
+func showUser(id int) {
+	c := redmine.NewClient(conf.Endpoint, conf.Apikey)
+	user, err := c.User(id)
+	if err != nil {
+		fatal("Failed to show user: %s\n", err)
+	}
+
+	printUser(user);
+}
+
+func showUserByLogin(login string) {
+	c := redmine.NewClient(conf.Endpoint, conf.Apikey)
+	user, err := c.UserByLogin(login)
+	if err != nil {
+		fatal("Failed to show user: %s\n", err)
+	}
+
+	printUser(user);
 }
 
 func listUsers() {
@@ -717,6 +731,9 @@ User Commands:
   show     s show given user.
              $ godmine u s 1
 
+  showByLogin L show user with given login
+             $ godmine u L admin
+
   list     l listing users.
              $ godmine u l
 
@@ -898,6 +915,13 @@ func main() {
 					fatal("Invalid user id: %s\n", err)
 				}
 				showUser(id)
+			} else {
+				usage()
+			}
+			break
+		case "L", "showByLogin":
+			if flag.NArg() == 3 {
+				showUserByLogin(flag.Arg(2))
 			} else {
 				usage()
 			}

@@ -5,6 +5,8 @@ import (
 	"errors"
 	"strconv"
 	"strings"
+	"net/url"
+	"fmt"
 )
 
 type userResult struct {
@@ -27,8 +29,13 @@ type User struct {
 	ApiKey      string       `json:"api_key"`
 }
 
-func (c *Client) Users() ([]User, error) {
-	res, err := c.Get(c.endpoint + "/users.json?key=" + c.apikey)
+func (c *Client) UsersByFilter(filter url.Values) ([]User, error) {
+	var filterStr string;
+	if (len(filter) > 0) {
+		filterStr = "&"+filter.Encode()
+	}
+
+	res, err := c.Get(c.endpoint + "/users.json?key=" + c.apikey+filterStr)
 	if err != nil {
 		return nil, err
 	}
@@ -49,6 +56,23 @@ func (c *Client) Users() ([]User, error) {
 		return nil, err
 	}
 	return r.Users, nil
+}
+
+func (c *Client) Users() ([]User, error) {	// For backward compatibility
+	return c.UsersByFilter(url.Values{})
+}
+
+func (c *Client) UserByLogin(login string) (*User, error) {
+	users,err := c.UsersByFilter( url.Values { "name": []string{login} } )
+	if (err != nil) {
+		return nil, err
+	}
+
+	if (len(users) == 0) {
+		return nil, fmt.Errorf("Cannot find user with login \"%v\"", login)
+	}
+
+	return &users[0], nil
 }
 
 func (c *Client) User(id int) (*User, error) {
